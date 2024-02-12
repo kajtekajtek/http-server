@@ -10,5 +10,7 @@ int main(int argc, char* argv[])
 
 	main_loop(&sock_listen);
 
+	close(sock_listen);
+
 	return 0;
 }

@@ -14,7 +14,7 @@
 #define BACKLOG 10
 
 // max line length
-#define MAXLINE 4096
+#define MAXLINE 10
 
 void bind_listener(int *sock_listen) 
 {
@@ -36,6 +36,14 @@ void bind_listener(int *sock_listen)
 		exit(1);
 	}	
 
+	// set the REUSEADDR option to 1
+	int yes = 1;
+	if (setsockopt(*sock_listen, SOL_SOCKET, SO_REUSEADDR, &yes, 
+		sizeof(int)) < 0) {
+		perror("setsockopt error");
+		exit(1);
+	}
+
 	// Bind socket
 	// socket to be bound, pointer to an address in SA structure,
 	// length of a SA structure
@@ -45,6 +53,7 @@ void bind_listener(int *sock_listen)
 	}
 }
 
+// Listen on socket
 void listen_on(int *sock_listen) 
 {
 	if (listen(*sock_listen, BACKLOG) < 0) {
