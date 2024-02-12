@@ -36,6 +36,7 @@ void bind_listener(int *sock_listen)
 		exit(1);
 	}	
 
+	// Set options
 	// set the REUSEADDR option to 1
 	int yes = 1;
 	if (setsockopt(*sock_listen, SOL_SOCKET, SO_REUSEADDR, &yes, 
