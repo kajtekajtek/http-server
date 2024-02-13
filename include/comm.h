@@ -7,7 +7,7 @@
 // max line length
 #define MAXLINE 4096
 
-void read_client_msg(int *sock_connect)
+void handle_request(int *sock_connect)
 {
 	uint8_t recvline[MAXLINE+1];
 	int n; // read() result
@@ -28,7 +28,7 @@ void read_client_msg(int *sock_connect)
 	}
 }
 
-void write_to_client(int *sock_connect)
+void write_response(int *sock_connect)
 {
 	uint8_t buff[MAXLINE+1];
 

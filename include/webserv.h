@@ -3,26 +3,25 @@
 #include "comm.h"
 #include <pthread.h>
 
-void* handle_connection(void *sock_connect) 
+// return and argument have to be void pointers since this is a new thread
+// function
+void * handle_connection(void *sock_connect) 
 {
-	// arguments to thread function have to be void pointers
-	// translate them to int here
-	int *s_conn = (int *)sock_connect;
+	handle_request(sock_connect);
+	write_response(sock_connect);
 
-	read_client_msg(s_conn);
-	write_to_client(s_conn);
+	return NULL;
 }
 
 void main_loop(int *sock_listen)
 {
+	int sock_connect; // connection socket
 	// client address stuff
 	SA_IN client_data;
 	socklen_t addr_len;
 	char client_address[MAXLINE+1];
 	
 	while(1) {
-		int sock_connect; // connection socket
-	
 		printf("waiting for a connection\n");	
 		fflush(stdout);
 
@@ -34,7 +33,8 @@ void main_loop(int *sock_listen)
 		printf("Connecting to: %s\n", client_address);
 
 		pthread_t new_thread;
+		int conn_to_handle = sock_connect;
 		pthread_create(&new_thread, NULL, handle_connection, 
-			&sock_connect);
+			&conn_to_handle);
 	}
 }
