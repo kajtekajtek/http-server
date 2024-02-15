@@ -1,24 +1,25 @@
-#include "comm.h"
+#include "communication.h"
 
-void handle_request(int *sock_connect)
+void read_from_client(int *sock_connect, uint8_t *buff)
 {
-	uint8_t recvline[MAXLINE+1];
 	int n; // read() result
 
-	memset(recvline, 0, MAXLINE);
-	while((n = read(*sock_connect, recvline, MAXLINE-1)) > 0) {
-		printf("\n%s\n", recvline);
-
+	memset(buff, 0, MAXLINE);
+	while((n = read(*sock_connect, buff, MAXLINE-1)) > 0) {
 		// newline terminates
-		if (recvline[n-1] == '\n') {
+		if (buff[n-1] == '\n') {
 			break;
 		}
-		memset(recvline, 0, MAXLINE);
 	}
 
 	if (n < 0) {
 		perror("read error");
 	}
+}
+
+struct http_request parse_request(uint8_t *raw_message)
+{
+	// parse request and fill request struct
 }
 
 void write_response(int *sock_connect)

@@ -2,10 +2,21 @@
 
 // return and argument have to be void pointers since this is a new thread
 // function
-void * handle_connection(void *sock_connect) 
+void *handle_connection(void *sock_connect) 
 {
-	handle_request(sock_connect);
-	write_response(sock_connect);
+	// client message buffer
+	uint8_t raw_message[MAXLINE]; 
+	// request information struct to fill up
+	struct http_request req;
+
+	read_from_client(sock_connect, raw_message);
+	
+	req = parse_request(raw_message);
+
+	printf("%s\n", raw_message);
+
+	// treat sock_connect as an int pointer
+	close(*(int*)sock_connect);
 
 	return NULL;
 }
