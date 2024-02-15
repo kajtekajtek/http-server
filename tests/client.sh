@@ -6,7 +6,7 @@
 # get server port number declared by PORT macro in include/networking.h
 get_port_number () 
 {
-	local port_number=$(cat include/networking.h | grep "#define PORT" \
+	local port_number=$(cat include/include.h | grep "#define PORT" \
 		| cut -d " " -f 3)
 
 	if [ $port_number -lt 0 ]; then
