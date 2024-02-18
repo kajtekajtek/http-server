@@ -19,3 +19,6 @@
 
 // max line length
 #define MAXLINE 4096
+
+// max http request parameter length
+#define MAXREQ 20

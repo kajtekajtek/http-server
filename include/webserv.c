@@ -37,16 +37,18 @@ void write_response(int *sock_connect)
 // function
 void *handle_connection(void *sock_connect) 
 {
-	// client message buffer
-	uint8_t raw_message[MAXLINE]; 
 	// request information struct to fill up
 	struct http_request req;
+	// client message buffer
+	uint8_t raw_message[MAXLINE] = { 0 }; 
 	// response
-	uint8_t response[MAXLINE];
+	uint8_t response[MAXLINE] = { 0 };
 
 	read_from_client(sock_connect, raw_message);
 	
 	req = parse_request(raw_message);
+
+	write_response(sock_connect);
 
 	// treat sock_connect as an int pointer
 	close(*(int*)sock_connect);
