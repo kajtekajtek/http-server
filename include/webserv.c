@@ -40,13 +40,16 @@ void *handle_connection(void *sock_connect)
 	// request information struct to fill up
 	struct http_request req;
 	// client message buffer
-	uint8_t raw_message[MAXLINE] = { 0 }; 
+	uint8_t raw_message[MAXMSG] = { 0 }; 
 	// response
-	uint8_t response[MAXLINE] = { 0 };
+	uint8_t response[MAXMSG] = { 0 };
 
 	read_from_client(sock_connect, raw_message);
 	
 	req = parse_request(raw_message);
+
+	printf("%d\n", req.method);
+	printf("%s\n", req.path);
 
 	write_response(sock_connect);
 

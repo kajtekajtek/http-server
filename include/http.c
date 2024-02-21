@@ -27,3 +27,16 @@ struct http_request parse_request(uint8_t *raw_message)
 
 	return req;
 }
+
+void prepare_response(struct http_request *req, uint8_t *response)
+{
+	switch (req->method)
+	{
+		case GET:
+			break;
+		default:
+			// error
+			response = "HTTP/1.1 400";
+			break;
+	}	
+}

@@ -18,7 +18,10 @@
 #define BACKLOG 10
 
 // max line length
-#define MAXLINE 4096
+#define MAXLINE 1024
+
+// max message length
+#define MAXMSG 1024
 
 // max http request parameter length
 #define MAXREQ 20

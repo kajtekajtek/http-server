@@ -36,5 +36,5 @@ fi
 # $file_name file
 echo "Connecting to localhost on port $port_number"
 echo -e "Response:\n"
-time nc -N 127.0.0.1 $port_number < $msg_file_name
+time nc -n 127.0.0.1 $port_number < $msg_file_name
 echo -e "\n\nDone\n"
