@@ -17,16 +17,13 @@ void read_from_client(int *sock_connect, uint8_t *buff)
 	}
 }
 
-void write_response(int *sock_connect)
+void write_response(int *sock_connect, char *res)
 {
-	uint8_t buff[MAXLINE+1];
-
 	// write response to a buffer
-	snprintf((char*)buff, sizeof(buff),
-			"HTTP/1.1 200 OK\r\n\r\nHello");
+//	snprintf((char*)buff, sizeof(buff), res);
 
 	// send response
-	if (write(*sock_connect, (char*)buff, strlen((char*)buff)) < 0) {
+	if (write(*sock_connect, res, strlen(res)) < 0) {
 		perror("write error");
 	}
 
@@ -42,16 +39,16 @@ void *handle_connection(void *sock_connect)
 	// client message buffer
 	uint8_t raw_message[MAXMSG] = { 0 }; 
 	// response
-	uint8_t response[MAXMSG] = { 0 };
+	char response[MAXMSG] = { 0 };
+	//printf("%d", sizeof(response));
 
 	read_from_client(sock_connect, raw_message);
 	
 	req = parse_request(raw_message);
 
-	printf("%d\n", req.method);
-	printf("%s\n", req.path);
+	prepare_response(&req, response);
 
-	write_response(sock_connect);
+	write_response(sock_connect, response);
 
 	// treat sock_connect as an int pointer
 	close(*(int*)sock_connect);
