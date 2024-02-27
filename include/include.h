@@ -21,7 +21,10 @@
 #define MAXLINE 1024
 
 // max message length
-#define MAXMSG 1024
+#define MAXMSG 4096
 
 // max http request parameter length
 #define MAXREQ 20
+
+// default '/' file
+#define DEFAULT_FILE "index.html"

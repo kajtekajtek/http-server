@@ -1,11 +1,36 @@
 #include "webserv.h"
 
+// open and read requested file, then save it contents to a buffer
+int read_from_file(char *path, char *buff)
+{
+	FILE *file_ptr;
+
+	// open the file
+	if ((file_ptr = fopen(path, "r")) == NULL) {
+		// error
+		return 1;
+	}
+
+	
+	// read from the file
+	while(fgets(buff, MAXLINE, file_ptr) != NULL) {
+		// reads only last line; in progress
+	}
+
+
+	// close the file
+	fclose(file_ptr);
+
+	return 0;
+}
+
+// read message from a client and write it to a buffer pointed by *buff
 void read_from_client(int *sock_connect, uint8_t *buff)
 {
 	int n; // read() result
 
-	memset(buff, 0, MAXLINE);
-	while((n = read(*sock_connect, buff, MAXLINE-1)) > 0) {
+	memset(buff, 0, MAXMSG);
+	while((n = read(*sock_connect, buff, MAXMSG - 1)) > 0) {
 		// newline terminates
 		if (buff[n-1] == '\n') {
 			break;
@@ -28,32 +53,6 @@ void write_response(int *sock_connect, char *res)
 	}
 
 	close(*sock_connect);
-}
-
-// return and argument have to be void pointers since this is a new thread
-// function
-void *handle_connection(void *sock_connect) 
-{
-	// request information struct to fill up
-	struct http_request req;
-	// client message buffer
-	uint8_t raw_message[MAXMSG] = { 0 }; 
-	// response
-	char response[MAXMSG] = { 0 };
-	//printf("%d", sizeof(response));
-
-	read_from_client(sock_connect, raw_message);
-	
-	req = parse_request(raw_message);
-
-	prepare_response(&req, response);
-
-	write_response(sock_connect, response);
-
-	// treat sock_connect as an int pointer
-	close(*(int*)sock_connect);
-
-	return NULL;
 }
 
 void main_loop(int *sock_listen)
@@ -80,4 +79,33 @@ void main_loop(int *sock_listen)
 		pthread_create(&new_thread, NULL, handle_connection, 
 			&conn_to_handle);
 	}
+}
+
+// return and argument have to be void pointers since this is a new thread
+// function
+void *handle_connection(void *sock_connect) 
+{
+	// request information struct to fill up
+	struct http_request req;
+	// client message buffer
+	uint8_t raw_message[MAXMSG]; 
+	// response
+	char response[MAXMSG];
+	//printf("%d", sizeof(response));
+
+	memset(raw_message, 0, MAXMSG);
+	memset(response, 0, MAXMSG);
+
+	read_from_client(sock_connect, raw_message);
+	
+	req = parse_request(raw_message);
+
+	prepare_response(&req, response);
+
+	write_response(sock_connect, response);
+
+	// treat sock_connect as an int pointer
+	close(*(int*)sock_connect);
+
+	return NULL;
 }

@@ -1,5 +1,16 @@
 #include "http.h"
 
+// --- Parsing requests
+// parse request from a raw string, then fill and return request struct
+struct http_request parse_request(uint8_t *raw_message)
+{
+	struct http_request req;
+
+	parse_request_line(raw_message, &req);
+
+	return req;
+}
+
 // parse first line of the request, request line, and fill req struct
 void parse_request_line(uint8_t *raw_message, struct http_request *req_ptr)
 {
@@ -20,35 +31,11 @@ void parse_request_line(uint8_t *raw_message, struct http_request *req_ptr)
 	}
 }
 
-// parse request from a raw string, then fill and return request struct
-struct http_request parse_request(uint8_t *raw_message)
-{
-	struct http_request req;
-
-	parse_request_line(raw_message, &req);
-
-	return req;
-}
-
-void get_requested_body(const struct http_request *req_ptr, char *response)
-{
-	// check if requested file exists
-	// get requested body if the file is found
-	// write body to a buffer or signalize error
-	FILE file_ptr;
-}
-
-// prepare response to the GET method
-void GET_response(const struct http_request *req_ptr, char *response)
-{
-	snprintf(response, MAXMSG, 
-		"HTTP/1.1 200 OK\r\n\r\n");
-}
-
+// --- Responses
 // interpret request struct and prepare response string for the client
-void prepare_response(const struct http_request *req_ptr, char *response)
+void prepare_response(struct http_request *req_ptr, char *response)
 {
-	switch (req->method)
+	switch (req_ptr->method)
 	{
 		case GET:
 			// attach requested body to the response
@@ -61,3 +48,42 @@ void prepare_response(const struct http_request *req_ptr, char *response)
 			break;
 	}	
 }
+
+int read_from_file(char *path, char *buff);
+
+// prepare response to the GET method
+void GET_response(struct http_request *req_ptr, char *response)
+{
+	char *path = req_ptr->path;
+	char response_body[MAXLINE];
+	
+	memset(response_body, 0, MAXLINE);
+
+	strcpy(path, req_ptr->path);
+
+	// remove leading slash
+	if (path[0] == '/') {
+		path += 1;
+	}
+
+	// set the path to DEFAULT_FILE if '/' path was requested
+	if (!strlen(path)) {
+		path = DEFAULT_FILE;
+	}
+
+	// read from file and return 404 on error
+	if (read_from_file(path, response_body) > 0) {
+		snprintf(response, MAXMSG, 
+			"HTTP/1.1 404 Not Found\r\n\r\n");
+		return;
+	}
+
+	// everything's fine
+	snprintf(response, MAXMSG, 
+		"HTTP/1.1 200 OK\r\n\r\n");
+
+	// concatenate response with body
+	strcat(response, response_body);
+}
+
+
