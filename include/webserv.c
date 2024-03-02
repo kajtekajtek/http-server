@@ -1,9 +1,11 @@
 #include "webserv.h"
 
 // open and read requested file, then save it contents to a buffer
-int read_from_file(char *path, char *buff)
+int read_from_file(char *path, char *buff, size_t *buff_size)
 {
 	FILE *file_ptr;
+	char chunk[MAXLINE + 1];
+	int bytes_read;
 
 	// open the file
 	if ((file_ptr = fopen(path, "r")) == NULL) {
@@ -11,10 +13,29 @@ int read_from_file(char *path, char *buff)
 		return 1;
 	}
 
+	printf("%s", buff);
 	
-	// read from the file
-	while(fgets(buff, MAXLINE, file_ptr) != NULL) {
-		// reads only last line; in progress
+	// read from the file iteratively in chunks
+	while((bytes_read = fread(chunk, 1, MAXLINE, file_ptr)) > 0) {
+		// check if there's enough space in the buffer
+		if (*buff_size + bytes_read >= MAXMSG) {
+			perror("reading file error; buffer overflow");
+			fclose(file_ptr);
+			return 1;
+		}
+
+		// concatenate the chunk to the buffer
+		strcat(buff, chunk);
+
+		// update the buffer size
+		*buff_size += bytes_read;
+	}
+
+	// check for the read error
+	if (ferror(file_ptr)) {
+		perror("reading file error");
+		fclose(file_ptr);
+		return 1;
 	}
 
 
@@ -44,9 +65,6 @@ void read_from_client(int *sock_connect, uint8_t *buff)
 
 void write_response(int *sock_connect, char *res)
 {
-	// write response to a buffer
-//	snprintf((char*)buff, sizeof(buff), res);
-
 	// send response
 	if (write(*sock_connect, res, strlen(res)) < 0) {
 		perror("write error");
@@ -88,10 +106,9 @@ void *handle_connection(void *sock_connect)
 	// request information struct to fill up
 	struct http_request req;
 	// client message buffer
-	uint8_t raw_message[MAXMSG]; 
+	uint8_t raw_message[MAXMSG + 1]; 
 	// response
-	char response[MAXMSG];
-	//printf("%d", sizeof(response));
+	char response[MAXMSG + 1];
 
 	memset(raw_message, 0, MAXMSG);
 	memset(response, 0, MAXMSG);

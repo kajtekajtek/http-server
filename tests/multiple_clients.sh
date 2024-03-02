@@ -1,11 +1,13 @@
 #!/bin/bash
 
-if [ $# != 1 ] || ! [[ $1 =~ ^[0-9]+$ ]]; then
-	echo "Usage: multiple_clients.sh [number of connections]"
+msg_file_name=$1 # file with the client message
+
+if [ $# != 2 ] || ! [[ $2 =~ ^[0-9]+$ ]]; then
+	echo "Usage: multiple_clients.sh [file] [number of connections]"
 	exit 1;
 fi
 
-for (( i=1; i <= $1; i++ )); do
+for (( i=1; i <= $2; i++ )); do
 	echo $i
-	tests/client.sh tests/test_msg.txt
+	time tests/client.sh $msg_file_name
 done

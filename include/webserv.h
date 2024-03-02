@@ -16,4 +16,4 @@ void *handle_connection(void *sock_connect);
 void main_loop(int *sock_listen);
 
 // open and read requested file, then save it contents to a buffer
-int read_from_file(char *path, char *buff);
+int read_from_file(char *path, char *buff, size_t *buff_size);

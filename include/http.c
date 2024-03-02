@@ -24,6 +24,7 @@ void parse_request_line(uint8_t *raw_message, struct http_request *req_ptr)
 		perror("request line parsing error");
 	}
 
+	// check the request method
 	if (strcmp(method, "GET") == 0) {
 		req_ptr->method = GET;
 	} else {
@@ -49,17 +50,12 @@ void prepare_response(struct http_request *req_ptr, char *response)
 	}	
 }
 
-int read_from_file(char *path, char *buff);
+int read_from_file(char *path, char *buff, size_t *buff_size);
 
 // prepare response to the GET method
 void GET_response(struct http_request *req_ptr, char *response)
 {
 	char *path = req_ptr->path;
-	char response_body[MAXLINE];
-	
-	memset(response_body, 0, MAXLINE);
-
-	strcpy(path, req_ptr->path);
 
 	// remove leading slash
 	if (path[0] == '/') {
@@ -71,19 +67,22 @@ void GET_response(struct http_request *req_ptr, char *response)
 		path = DEFAULT_FILE;
 	}
 
-	// read from file and return 404 on error
-	if (read_from_file(path, response_body) > 0) {
-		snprintf(response, MAXMSG, 
-			"HTTP/1.1 404 Not Found\r\n\r\n");
-		return;
-	}
-
-	// everything's fine
+	// first line of the response
 	snprintf(response, MAXMSG, 
 		"HTTP/1.1 200 OK\r\n\r\n");
 
-	// concatenate response with body
-	strcat(response, response_body);
+	// current response size + terminating zero
+	size_t response_size = strlen(response) + 1;
+
+	// read from file and return 404 on error
+	if (read_from_file(path, response, &response_size) > 0) {
+		memset(response, 0, sizeof(response));
+		snprintf(response, MAXMSG, 
+			"HTTP/1.1 404 Not Found\r\n\r\n");
+
+		path = NULL;
+		return;
+	}
+
+	path = NULL;
 }
-
-
